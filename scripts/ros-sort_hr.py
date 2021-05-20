@@ -74,8 +74,7 @@ def iou(bb_test, bb_gt):
   w = np.maximum(0., xx2 - xx1)
   h = np.maximum(0., yy2 - yy1)
   wh = w * h
-  o = wh / ((bb_test[2] - bb_test[0]) * (bb_test[3] - bb_test[1])
-    + (bb_gt[2] - bb_gt[0]) * (bb_gt[3] - bb_gt[1]) - wh)
+  o = wh / (((bb_test[2] - bb_test[0]) * (bb_test[3] - bb_test[1])) + ((bb_gt[2] - bb_gt[0]) * (bb_gt[3] - bb_gt[1])) - wh)
   return(o)
 
 
@@ -220,11 +219,12 @@ def associate_detections_to_trackers(detections,trackers,iou_threshold = 0.3):
 class Sort(object):
   def __init__(self, max_age=5, min_hits=1):
 #----------------------------------------------------down-----------------------------------------------------------
-    rospy.init_node('sort', anonymous=True)
+    rospy.init_node('sort', anonymous=False)
     self.subb = rospy.Subscriber('yolo_output/', yolo_coordinateArray, self.boxcallback) # need to change(tkdnn_ros)
     self.pubb = rospy.Publisher('tracked_boxes', yolo_coordinateArray, queue_size=50)
     self.rate = rospy.Rate(30)
-    display = rospy.get_param("/display", True)
+    #display = rospy.get_param("/display", True)
+    display = True
     max_age = rospy.get_param("/max_age", max_age)
     min_hits = rospy.get_param("/min_hits", min_hits)
     self.iou_threshold = rospy.get_param("/iou_threshold", 0.3)
@@ -252,6 +252,7 @@ class Sort(object):
 
 
   def imgcallback(self, msg):
+    print("--------------------------------------------------\n")
     temp_image = msg
     if self.display:
         try : 

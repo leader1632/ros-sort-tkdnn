@@ -224,13 +224,14 @@ class Sort(object):
     self.subb = rospy.Subscriber('darknet_ros/bounding_boxes/', BoundingBoxes, self.boxcallback) # need to change(tkdnn_ros)
     self.pubb = rospy.Publisher('tracked_boxes', BoundingBoxes, queue_size=50)
     self.rate = rospy.Rate(30)
-    display = rospy.get_param("/display", True)
+    #display = rospy.get_param("/display", True)
+    display = True 
     max_age = rospy.get_param("/max_age", max_age)
     min_hits = rospy.get_param("/min_hits", min_hits)
     self.iou_threshold = rospy.get_param("/iou_threshold", 0.3)
 
     if display:
-        img_topic = rospy.get_param("/img_topic", '/imx477/image_raw')
+        img_topic = rospy.get_param("/img_topic", '/usb_cam/image_raw')
         self.display = display
         self.subimage = rospy.Subscriber(img_topic, Image, self.imgcallback) # need to change(usb_cam)
         self.pubimage = rospy.Publisher('tracked_image', Image, queue_size=20)
