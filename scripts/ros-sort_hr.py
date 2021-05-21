@@ -74,7 +74,8 @@ def iou(bb_test, bb_gt):
   w = np.maximum(0., xx2 - xx1)
   h = np.maximum(0., yy2 - yy1)
   wh = w * h
-  o = wh / (((bb_test[2] - bb_test[0]) * (bb_test[3] - bb_test[1])) + ((bb_gt[2] - bb_gt[0]) * (bb_gt[3] - bb_gt[1])) - wh)
+  o = wh / ((bb_test[2] - bb_test[0]) * (bb_test[3] - bb_test[1])
+    + (bb_gt[2] - bb_gt[0]) * (bb_gt[3] - bb_gt[1]) - wh)
   return(o)
 
 
@@ -332,8 +333,8 @@ if __name__ == '__main__':
                 trackers = mot_tracker.update(np.empty((0,5)))
 
             r = yolo_coordinateArray()
-            
             for d in range(len(trackers)):
+                print(trackers)
                 rb = yolo_coordinate()
                 rb.confidence=1
                 rb.xmin = int(trackers[d,0])
@@ -343,15 +344,23 @@ if __name__ == '__main__':
                 rb.id = int(trackers[d,4])
                 rb.label = 'tracked'
                 r.results.append(rb)
+                
                 if mot_tracker.img_in==1 and mot_tracker.display:
-                    res = trackers[d].astype(np.int32)
-                    rgb=colours[res[4]%32,:]*255
-                    cv2.rectangle(mot_tracker.img, (res[0],res[1]), (res[2],res[3]), (rgb[0],rgb[1],rgb[2]), 6)
-                    cv2.putText(mot_tracker.img, "ID : %d"%(res[4]), (res[0],res[1]), cv2.FONT_HERSHEY_SIMPLEX, 1.6, (200,85,200), 6)
+                    #res = trackers[d].astype(np.int32)
+                    #rgb=colours[res[4]%32,:]*255
+                    rgb = colours[(rb.id)%32,:]*255
+                    #cv2.rectangle(mot_tracker.img, (res[0],res[1]), (res[2],res[3]), (rgb[0],rgb[1],rgb[2]), 6)
+                    cv2.rectangle(mot_tracker.img, (rb.xmin,rb.ymin),(rb.xmax,rb.ymax),(rgb[0],rgb[1],rgb[2]),6)
+                    
+                    #cv2.putText(mot_tracker.img, "ID : %d"%(res[4]), (res[0],res[1]), cv2.FONT_HERSHEY_SIMPLEX, 1.6, (200,85,200), 6)
+                    cv2.putText(mot_tracker.img, "ID : %d"%(rb.id), (rb.xmin,rb.ymin), cv2.FONT_HERSHEY_SIMPLEX, 1.6, (200,85,200), 6)
+                    
+                    
             if mot_tracker.img_in==1 and mot_tracker.display:
                 try : 
                     mot_tracker.image = mot_tracker.bridge.cv2_to_imgmsg(mot_tracker.img, "bgr8")
                     #mot_tracker.image.header.stamp = rospy.Time.now()
+                    
                     mot_tracker.pubimage.publish(mot_tracker.image)
                 except CvBridgeError as e:
                     pass
